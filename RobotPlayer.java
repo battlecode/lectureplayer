@@ -86,7 +86,7 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
-        if (rc.getSoupCarrying() == 100) {
+        if (rc.getSoupCarrying() == RobotType.MINER.soupLimit) {
             // time to go back to the HQ
             Direction dirToHQ = rc.getLocation().directionTo(hqLoc);
             if(tryMove(dirToHQ))
