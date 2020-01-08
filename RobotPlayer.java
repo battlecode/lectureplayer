@@ -88,10 +88,9 @@ public strictfp class RobotPlayer {
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
         if (rc.getSoupCarrying() == RobotType.MINER.soupLimit) {
             // time to go back to the HQ
-            Direction dirToHQ = rc.getLocation().directionTo(hqLoc);
-            if(tryMove(dirToHQ))
+            if(goTo(hqLoc))
                 System.out.println("moved towards HQ");
-        } else if (tryMove(randomDirection())) {
+        } else if (goTo(randomDirection())) {
             // otherwise, move randomly as usual
             System.out.println("I moved randomly!");
         }
@@ -173,9 +172,19 @@ public strictfp class RobotPlayer {
         //     return tryMove(Direction.NORTH);
     }
 
-    // checks if the direction is legal and not flooded
-    static boolean safeToMove(Direction dir) throws GameActionException {
-        return rc.isReady() && rc.canMove(dir) && !rc.senseFlooding(rc.getLocation().add(dir));
+    // tries to move in the general direction of dir
+    static boolean goTo(Direction dir) throws GameActionException {
+        Direction[] toTry = {dir, dir.rotateLeft(), dir.rotateRight(), dir.rotateLeft().rotateLeft(), dir.rotateRight().rotateRight()};
+        for (Direction d : toTry){
+            if(tryMove(d))
+                return true;
+        }
+        return false;
+    }
+
+    // navigate towards a particular location
+    static boolean goTo(MapLocation destination) throws GameActionException {
+        return goTo(rc.getLocation().directionTo(destination));
     }
 
     /**
@@ -186,8 +195,7 @@ public strictfp class RobotPlayer {
      * @throws GameActionException
      */
     static boolean tryMove(Direction dir) throws GameActionException {
-        // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if(safeToMove(dir)) {
+        if (rc.isReady() && rc.canMove(dir) && !rc.senseFlooding(rc.getLocation().add(dir))) {
             rc.move(dir);
             return true;
         } else return false;
