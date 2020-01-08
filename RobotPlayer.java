@@ -173,6 +173,11 @@ public strictfp class RobotPlayer {
         //     return tryMove(Direction.NORTH);
     }
 
+    // checks if the direction is legal and not flooded
+    static boolean safeToMove(Direction dir) throws GameActionException {
+        return rc.isReady() && rc.canMove(dir) && !rc.senseFlooding(rc.getLocation().add(dir));
+    }
+
     /**
      * Attempts to move in a given direction.
      *
@@ -182,7 +187,7 @@ public strictfp class RobotPlayer {
      */
     static boolean tryMove(Direction dir) throws GameActionException {
         // System.out.println("I am trying to move " + dir + "; " + rc.isReady() + " " + rc.getCooldownTurns() + " " + rc.canMove(dir));
-        if (rc.isReady() && rc.canMove(dir)) {
+        if(safeToMove(dir)) {
             rc.move(dir);
             return true;
         } else return false;
