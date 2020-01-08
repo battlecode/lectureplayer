@@ -70,8 +70,10 @@ public strictfp class RobotPlayer {
     static void runMiner() throws GameActionException {
         tryBlockchain();
         tryMove(randomDirection());
-        if (tryMove(randomDirection()))
+        if (tryMove(randomDirection())) {
+            // lol this is gonna cause a merge conflict
             System.out.println("I moved!");
+        }
         // tryBuild(randomSpawnedByMiner(), randomDirection());
         for (Direction dir : directions)
             tryBuild(RobotType.FULFILLMENT_CENTER, dir);
