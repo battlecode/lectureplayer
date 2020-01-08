@@ -86,8 +86,15 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
-        if (tryMove(randomDirection()))
-            System.out.println("I moved!");
+        if (rc.getSoupCarrying() == 100) {
+            // time to go back to the HQ
+            Direction dirToHQ = rc.getLocation().directionTo(hqLoc);
+            if(tryMove(dirToHQ))
+                System.out.println("moved towards HQ");
+        } else if (tryMove(randomDirection())) {
+            // otherwise, move randomly as usual
+            System.out.println("I moved randomly!");
+        }
     }
 
     static void runRefinery() throws GameActionException {
