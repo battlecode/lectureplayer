@@ -91,6 +91,11 @@ public strictfp class RobotPlayer {
         for (Direction dir : directions)
             if (tryMine(dir))
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
+        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)){
+            if(tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
+                System.out.println("created a design school");
+        }
+
         if (rc.getSoupCarrying() == RobotType.MINER.soupLimit) {
             // time to go back to the HQ
             Direction dirToHQ = rc.getLocation().directionTo(hqLoc);
@@ -111,7 +116,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
-
+        for (Direction dir : directions)
+            if(tryBuild(RobotType.LANDSCAPER, dir))
+                System.out.println("made a landscaper");
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -160,6 +167,16 @@ public strictfp class RobotPlayer {
      */
     static RobotType randomSpawnedByMiner() {
         return spawnedByMiner[(int) (Math.random() * spawnedByMiner.length)];
+    }
+
+    static boolean nearbyRobot(RobotType target) throws GameActionException {
+        RobotInfo[] robots = rc.senseNearbyRobots();
+        for(RobotInfo r : robots) {
+            if(r.getType() == target) {
+                return true;
+            }
+        }
+        return false;
     }
 
     static boolean tryMove() throws GameActionException {
