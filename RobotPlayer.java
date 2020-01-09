@@ -1,5 +1,6 @@
 package lectureplayer;
 import battlecode.common.*;
+import java.lang.Math;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -135,8 +136,9 @@ public strictfp class RobotPlayer {
             tryDig();
         }
 
+        MapLocation bestPlaceToBuildWall = null;
+        // find best place to build
         if(hqLoc != null) {
-            MapLocation bestPlaceToBuildWall = null;
             int lowestElevation = 9999999;
             for (Direction dir : directions) {
                 MapLocation tileToCheck = hqLoc.add(dir);
@@ -148,13 +150,22 @@ public strictfp class RobotPlayer {
                     }
                 }
             }
+        }
+
+        if (Math.random() < 0.4){
+            // build the wall
             if (bestPlaceToBuildWall != null) {
                 rc.depositDirt(rc.getLocation().directionTo(bestPlaceToBuildWall));
                 System.out.println("building a wall");
             }
         }
 
-        tryMove(randomDirection());
+        // otherwise try to get to the hq
+        if(hqLoc != null){
+            goTo(hqLoc);
+        } else {
+            tryMove(randomDirection());
+        }
     }
 
     static void runDeliveryDrone() throws GameActionException {
