@@ -75,6 +75,7 @@ public strictfp class RobotPlayer {
                 }
             }
             // TODO later: use blockchain to communicate
+            // idea: HQ broadcasts code and location on turn 1, all units check for the special code
         }
     }
 
