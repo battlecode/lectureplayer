@@ -19,6 +19,7 @@ public strictfp class RobotPlayer {
 
     static int turnCount;
     static MapLocation hqLoc;
+    static int numMiners = 0;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -64,8 +65,12 @@ public strictfp class RobotPlayer {
     }
 
     static void runHQ() throws GameActionException {
-        for (Direction dir : directions)
-            tryBuild(RobotType.MINER, dir);
+        if(numMiners < 10) {
+            for (Direction dir : directions)
+                if(tryBuild(RobotType.MINER, dir)){
+                    numMiners++;
+                }
+        }
     }
 
     static void runMiner() throws GameActionException {
