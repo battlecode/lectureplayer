@@ -42,6 +42,7 @@ public strictfp class RobotPlayer {
                 // Here, we've separated the controls into a different method for each RobotType.
                 // You can add the missing ones or rewrite this into your own control structure.
                 System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
+                findHQ();
                 switch (rc.getType()) {
                     case HQ:                 runHQ();                break;
                     case MINER:              runMiner();             break;
@@ -64,6 +65,19 @@ public strictfp class RobotPlayer {
         }
     }
 
+    static void findHQ() throws GameActionException {
+        if (hqLoc == null) {
+            // search surroundings for HQ
+            RobotInfo[] robots = rc.senseNearbyRobots();
+            for (RobotInfo robot : robots) {
+                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
+                    hqLoc = robot.location;
+                }
+            }
+            // TODO later: use blockchain to communicate
+        }
+    }
+
     static void runHQ() throws GameActionException {
         if(numMiners < 10) {
             for (Direction dir : directions)
@@ -74,16 +88,6 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        if (hqLoc == null) {
-            // search surroundings for HQ
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for (RobotInfo robot : robots) {
-                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
-                    hqLoc = robot.location;
-                }
-            }
-        }
-
         tryBlockchain();
         for (Direction dir : directions)
             if (tryRefine(dir))
@@ -127,7 +131,30 @@ public strictfp class RobotPlayer {
     }
 
     static void runLandscaper() throws GameActionException {
+        if(rc.getDirtCarrying() == 0){
+            tryDig();
+        }
 
+        if(hqLoc != null) {
+            MapLocation bestPlaceToBuildWall = null;
+            int lowestElevation = 9999999;
+            for (Direction dir : directions) {
+                MapLocation tileToCheck = hqLoc.add(dir);
+                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
+                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))) {
+                    if (rc.senseElevation(tileToCheck) < lowestElevation) {
+                        lowestElevation = rc.senseElevation(tileToCheck);
+                        bestPlaceToBuildWall = tileToCheck;
+                    }
+                }
+            }
+            if (bestPlaceToBuildWall != null) {
+                rc.depositDirt(rc.getLocation().directionTo(bestPlaceToBuildWall));
+                System.out.println("building a wall");
+            }
+        }
+
+        tryMove(randomDirection());
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -175,6 +202,15 @@ public strictfp class RobotPlayer {
             if(r.getType() == target) {
                 return true;
             }
+        }
+        return false;
+    }
+
+    static boolean tryDig() throws GameActionException {
+        Direction dir = randomDirection();
+        if(rc.canDigDirt(dir)){
+            rc.digDirt(dir);
+            return true;
         }
         return false;
     }
