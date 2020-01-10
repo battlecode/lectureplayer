@@ -1,6 +1,7 @@
 package lectureplayer;
 import battlecode.common.*;
 import java.lang.Math;
+import java.util.ArrayList;
 
 public strictfp class RobotPlayer {
     static RobotController rc;
@@ -21,6 +22,8 @@ public strictfp class RobotPlayer {
     static int turnCount;
     static MapLocation hqLoc;
     static int numMiners = 0;
+    static int numDesignSchools = 0;
+    static ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -75,12 +78,17 @@ public strictfp class RobotPlayer {
                     hqLoc = robot.location;
                 }
             }
-            // TODO later: use blockchain to communicate
-            // idea: HQ broadcasts code and location on turn 1, all units check for the special code
+            if(hqLoc == null) {
+                // if still null, search the blockchain
+                getHqLocFromBlockchain();
+            }
         }
     }
 
     static void runHQ() throws GameActionException {
+        if(turnCount == 1) {
+            sendHqLoc(rc.getLocation());
+        }
         if(numMiners < 10) {
             for (Direction dir : directions)
                 if(tryBuild(RobotType.MINER, dir)){
@@ -90,14 +98,22 @@ public strictfp class RobotPlayer {
     }
 
     static void runMiner() throws GameActionException {
-        tryBlockchain();
+        updateUnitCounts();
+        updateSoupLocations();
+        checkIfSoupGone();
+
         for (Direction dir : directions)
             if (tryRefine(dir))
                 System.out.println("I refined soup! " + rc.getTeamSoup());
         for (Direction dir : directions)
-            if (tryMine(dir))
+            if (tryMine(dir)) {
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
-        if (!nearbyRobot(RobotType.DESIGN_SCHOOL)){
+                MapLocation soupLoc = rc.getLocation().add(dir);
+                if (!soupLocations.contains(soupLoc)) {
+                    broadcastSoupLocation(soupLoc);
+                }
+            }
+        if (numDesignSchools < 3){
             if(tryBuild(RobotType.DESIGN_SCHOOL, randomDirection()))
                 System.out.println("created a design school");
         }
@@ -106,6 +122,8 @@ public strictfp class RobotPlayer {
             // time to go back to the HQ
             if(goTo(hqLoc))
                 System.out.println("moved towards HQ");
+        } else if (soupLocations.size() > 0) {
+            goTo(soupLocations.get(0));
         } else if (goTo(randomDirection())) {
             // otherwise, move randomly as usual
             System.out.println("I moved randomly!");
@@ -121,6 +139,9 @@ public strictfp class RobotPlayer {
     }
 
     static void runDesignSchool() throws GameActionException {
+        if (!broadcastedCreation) {
+            broadcastDesignSchoolCreation(rc.getLocation());
+        }
         for (Direction dir : directions)
             if(tryBuild(RobotType.LANDSCAPER, dir))
                 System.out.println("made a landscaper");
@@ -187,6 +208,16 @@ public strictfp class RobotPlayer {
 
     static void runNetGun() throws GameActionException {
 
+    }
+
+    static void checkIfSoupGone() throws GameActionException {
+        if (soupLocations.size() > 0) {
+            MapLocation targetSoupLoc = soupLocations.get(0);
+            if (rc.canSenseLocation(targetSoupLoc)
+                    && rc.senseSoup(targetSoupLoc) == 0) {
+                soupLocations.remove(0);
+            }
+        }
     }
 
     /**
@@ -325,5 +356,84 @@ public strictfp class RobotPlayer {
                 rc.submitTransaction(message, 10);
         }
         // System.out.println(rc.getRoundMessages(turnCount-1));
+    }
+
+    /* COMMUNICATIONS STUFF */
+    // all messages from our team should start with this so we can tell them apart
+    static final int teamSecret = 444444444;
+    // the second entry in every message tells us what kind of message it is. e.g. 0 means it contains the HQ location
+    static final String[] messageType = {
+        "HQ loc",
+        "design school created",
+        "soup location",
+    };
+
+    public static void sendHqLoc(MapLocation loc) throws GameActionException {
+        int[] message = new int[7];
+        message[0] = teamSecret;
+        message[1] = 0;
+        message[2] = loc.x; // x coord of HQ
+        message[3] = loc.y; // y coord of HQ
+        if (rc.canSubmitTransaction(message, 3))
+            rc.submitTransaction(message, 3);
+    }
+
+    public static void getHqLocFromBlockchain() throws GameActionException {
+        System.out.println("B L O C K C H A I N");
+        for (int i = 1; i < rc.getRoundNum(); i++){
+            for(Transaction tx : rc.getBlock(i)) {
+                int[] mess = tx.getMessage();
+                if(mess[0] == teamSecret && mess[1] == 0){
+                    System.out.println("found the HQ!");
+                    hqLoc = new MapLocation(mess[2], mess[3]);
+                }
+            }
+        }
+    }
+
+    public static boolean broadcastedCreation = false;
+    public static void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
+        int[] message = new int[7];
+        message[0] = teamSecret;
+        message[1] = 1;
+        message[2] = loc.x; // x coord of HQ
+        message[3] = loc.y; // y coord of HQ
+        if (rc.canSubmitTransaction(message, 3)) {
+            rc.submitTransaction(message, 3);
+            broadcastedCreation = true;
+        }
+    }
+
+    // check the latest block for unit creation messages
+    public static void updateUnitCounts() throws GameActionException {
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] mess = tx.getMessage();
+            if(mess[0] == teamSecret && mess[1] == 1){
+                System.out.println("heard about a cool new school");
+                numDesignSchools += 1;
+            }
+        }
+    }
+
+    public static void broadcastSoupLocation(MapLocation loc ) throws GameActionException {
+        int[] message = new int[7];
+        message[0] = teamSecret;
+        message[1] = 2;
+        message[2] = loc.x; // x coord of HQ
+        message[3] = loc.y; // y coord of HQ
+        if (rc.canSubmitTransaction(message, 3)) {
+            rc.submitTransaction(message, 3);
+            System.out.println("new soup!" + loc);
+        }
+    }
+
+    public static void updateSoupLocations() throws GameActionException {
+        for(Transaction tx : rc.getBlock(rc.getRoundNum() - 1)) {
+            int[] mess = tx.getMessage();
+            if(mess[0] == teamSecret && mess[1] == 2){
+                System.out.println("heard about a tasty new soup location");
+                soupLocations.add(new MapLocation(mess[2], mess[3]));
+            }
+        }
     }
 }
