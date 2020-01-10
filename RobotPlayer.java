@@ -124,6 +124,7 @@ public strictfp class RobotPlayer {
                 System.out.println("moved towards HQ");
         } else if (soupLocations.size() > 0) {
             goTo(soupLocations.get(0));
+            rc.setIndicatorLine(rc.getLocation(), soupLocations.get(0), 255, 255, 0);
         } else if (goTo(randomDirection())) {
             // otherwise, move randomly as usual
             System.out.println("I moved randomly!");
@@ -177,6 +178,7 @@ public strictfp class RobotPlayer {
             // build the wall
             if (bestPlaceToBuildWall != null) {
                 rc.depositDirt(rc.getLocation().directionTo(bestPlaceToBuildWall));
+                rc.setIndicatorDot(bestPlaceToBuildWall, 0, 255, 0);
                 System.out.println("building a wall");
             }
         }
@@ -252,6 +254,7 @@ public strictfp class RobotPlayer {
         Direction dir = randomDirection();
         if(rc.canDigDirt(dir)){
             rc.digDirt(dir);
+            rc.setIndicatorDot(rc.getLocation().add(dir), 255, 0, 0);
             return true;
         }
         return false;
@@ -285,7 +288,7 @@ public strictfp class RobotPlayer {
 
     // navigate towards a particular location
     static boolean goTo(MapLocation destination) throws GameActionException {
-        return goTo(rc.getLocation().directionTo(destination));
+        return goTo(rc.getLocation().directionTo(destination).opposite());
     }
 
     /**
