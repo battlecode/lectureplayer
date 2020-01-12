@@ -288,7 +288,7 @@ public strictfp class RobotPlayer {
 
     // navigate towards a particular location
     static boolean goTo(MapLocation destination) throws GameActionException {
-        return goTo(rc.getLocation().directionTo(destination).opposite());
+        return goTo(rc.getLocation().directionTo(destination));
     }
 
     /**
