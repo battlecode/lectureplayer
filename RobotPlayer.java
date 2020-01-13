@@ -6,22 +6,8 @@ import java.util.ArrayList;
 public strictfp class RobotPlayer {
     static RobotController rc;
 
-    static Direction[] directions = {
-        Direction.NORTH,
-        Direction.NORTHEAST,
-        Direction.EAST,
-        Direction.SOUTHEAST,
-        Direction.SOUTH,
-        Direction.SOUTHWEST,
-        Direction.WEST,
-        Direction.NORTHWEST
-    };
-    static RobotType[] spawnedByMiner = {RobotType.REFINERY, RobotType.VAPORATOR, RobotType.DESIGN_SCHOOL,
-            RobotType.FULFILLMENT_CENTER, RobotType.NET_GUN};
-
     static int turnCount;
     static MapLocation hqLoc;
-    static int numMiners = 0;
     static int numDesignSchools = 0;
     static ArrayList<MapLocation> soupLocations = new ArrayList<MapLocation>();
 
@@ -33,7 +19,7 @@ public strictfp class RobotPlayer {
         Robot me = null;
 
         switch (rc.getType()) {
-            case HQ:                 me = new Building(rc);     break;
+            case HQ:                 me = new HQ(rc);     break;
             case MINER:              me = new Unit(rc);     break;
             case REFINERY:           me = new Building(rc);     break;
             case VAPORATOR:          me = new Building(rc);     break;
@@ -57,83 +43,15 @@ public strictfp class RobotPlayer {
         }
     }
 
-    @SuppressWarnings("unused")
-    public static void oldrun(RobotController rc) throws GameActionException {
-
-        // This is the RobotController object. You use it to perform actions from this robot,
-        // and to get information on its current status.
-        RobotPlayer.rc = rc;
-
-        turnCount = 0;
-
-        System.out.println("I'm a " + rc.getType() + " and I just got created!");
-        while (true) {
-            turnCount += 1;
-            // Try/catch blocks stop unhandled exceptions, which cause your robot to explode
-            try {
-                // Here, we've separated the controls into a different method for each RobotType.
-                // You can add the missing ones or rewrite this into your own control structure.
-                System.out.println("I'm a " + rc.getType() + "! Location " + rc.getLocation());
-                findHQ();
-                switch (rc.getType()) {
-                    case HQ:                 runHQ();                break;
-                    case MINER:              runMiner();             break;
-                    case REFINERY:           runRefinery();          break;
-                    case VAPORATOR:          runVaporator();         break;
-                    case DESIGN_SCHOOL:      runDesignSchool();      break;
-                    case FULFILLMENT_CENTER: runFulfillmentCenter(); break;
-                    case LANDSCAPER:         runLandscaper();        break;
-                    case DELIVERY_DRONE:     runDeliveryDrone();     break;
-                    case NET_GUN:            runNetGun();            break;
-                }
-
-                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
-                Clock.yield();
-
-            } catch (Exception e) {
-                System.out.println(rc.getType() + " Exception");
-                e.printStackTrace();
-            }
-        }
-    }
-
-    static void findHQ() throws GameActionException {
-        if (hqLoc == null) {
-            // search surroundings for HQ
-            RobotInfo[] robots = rc.senseNearbyRobots();
-            for (RobotInfo robot : robots) {
-                if (robot.type == RobotType.HQ && robot.team == rc.getTeam()) {
-                    hqLoc = robot.location;
-                }
-            }
-            if(hqLoc == null) {
-                // if still null, search the blockchain
-                getHqLocFromBlockchain();
-            }
-        }
-    }
-
-    static void runHQ() throws GameActionException {
-        if(turnCount == 1) {
-            sendHqLoc(rc.getLocation());
-        }
-        if(numMiners < 10) {
-            for (Direction dir : directions)
-                if(tryBuild(RobotType.MINER, dir)){
-                    numMiners++;
-                }
-        }
-    }
-
     static void runMiner() throws GameActionException {
         updateUnitCounts();
         updateSoupLocations();
         checkIfSoupGone();
 
-        for (Direction dir : directions)
+        for (Direction dir : Util.directions)
             if (tryRefine(dir))
                 System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : directions)
+        for (Direction dir : Util.directions)
             if (tryMine(dir)) {
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
                 MapLocation soupLoc = rc.getLocation().add(dir);
@@ -171,13 +89,13 @@ public strictfp class RobotPlayer {
         if (!broadcastedCreation) {
             broadcastDesignSchoolCreation(rc.getLocation());
         }
-        for (Direction dir : directions)
+        for (Direction dir : Util.directions)
             if(tryBuild(RobotType.LANDSCAPER, dir))
                 System.out.println("made a landscaper");
     }
 
     static void runFulfillmentCenter() throws GameActionException {
-        for (Direction dir : directions)
+        for (Direction dir : Util.directions)
             tryBuild(RobotType.DELIVERY_DRONE, dir);
     }
 
@@ -190,7 +108,7 @@ public strictfp class RobotPlayer {
         // find best place to build
         if(hqLoc != null) {
             int lowestElevation = 9999999;
-            for (Direction dir : directions) {
+            for (Direction dir : Util.directions) {
                 MapLocation tileToCheck = hqLoc.add(dir);
                 if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
                         && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))) {
@@ -256,16 +174,7 @@ public strictfp class RobotPlayer {
      * @return a random Direction
      */
     static Direction randomDirection() {
-        return directions[(int) (Math.random() * directions.length)];
-    }
-
-    /**
-     * Returns a random RobotType spawned by miners.
-     *
-     * @return a random RobotType
-     */
-    static RobotType randomSpawnedByMiner() {
-        return spawnedByMiner[(int) (Math.random() * spawnedByMiner.length)];
+        return Util.directions[(int) (Math.random() * Util.directions.length)];
     }
 
     static boolean nearbyRobot(RobotType target) throws GameActionException {
@@ -289,7 +198,7 @@ public strictfp class RobotPlayer {
     }
 
     static boolean tryMove() throws GameActionException {
-        for (Direction dir : directions)
+        for (Direction dir : Util.directions)
             if (tryMove(dir))
                 return true;
         return false;
@@ -377,18 +286,6 @@ public strictfp class RobotPlayer {
     }
 
 
-    static void tryBlockchain() throws GameActionException {
-        if (turnCount < 3) {
-            int[] message = new int[7];
-            for (int i = 0; i < 7; i++) {
-                message[i] = 123;
-            }
-            if (rc.canSubmitTransaction(message, 10))
-                rc.submitTransaction(message, 10);
-        }
-        // System.out.println(rc.getRoundMessages(turnCount-1));
-    }
-
     /* COMMUNICATIONS STUFF */
     // all messages from our team should start with this so we can tell them apart
     static final int teamSecret = 444444444;
@@ -399,28 +296,6 @@ public strictfp class RobotPlayer {
         "soup location",
     };
 
-    public static void sendHqLoc(MapLocation loc) throws GameActionException {
-        int[] message = new int[7];
-        message[0] = teamSecret;
-        message[1] = 0;
-        message[2] = loc.x; // x coord of HQ
-        message[3] = loc.y; // y coord of HQ
-        if (rc.canSubmitTransaction(message, 3))
-            rc.submitTransaction(message, 3);
-    }
-
-    public static void getHqLocFromBlockchain() throws GameActionException {
-        System.out.println("B L O C K C H A I N");
-        for (int i = 1; i < rc.getRoundNum(); i++){
-            for(Transaction tx : rc.getBlock(i)) {
-                int[] mess = tx.getMessage();
-                if(mess[0] == teamSecret && mess[1] == 0){
-                    System.out.println("found the HQ!");
-                    hqLoc = new MapLocation(mess[2], mess[3]);
-                }
-            }
-        }
-    }
 
     public static boolean broadcastedCreation = false;
     public static void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {

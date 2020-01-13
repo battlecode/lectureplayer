@@ -7,7 +7,7 @@ public class Building extends Robot {
         super(r);
     }
 
-    public void takeTurn() {
+    public void takeTurn() throws GameActionException {
         super.takeTurn();
 
         System.out.println("I'm a building");
