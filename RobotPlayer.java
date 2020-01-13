@@ -29,8 +29,36 @@ public strictfp class RobotPlayer {
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
      **/
-    @SuppressWarnings("unused")
     public static void run(RobotController rc) throws GameActionException {
+        Robot me = null;
+
+        switch (rc.getType()) {
+            case HQ:                 me = new Building(rc);     break;
+            case MINER:              me = new Unit(rc);     break;
+            case REFINERY:           me = new Building(rc);     break;
+            case VAPORATOR:          me = new Building(rc);     break;
+            case DESIGN_SCHOOL:      me = new Building(rc);     break;
+            case FULFILLMENT_CENTER: me = new Building(rc);     break;
+            case LANDSCAPER:         me = new Unit(rc);     break;
+            case DELIVERY_DRONE:     me = new Unit(rc);     break;
+            case NET_GUN:            me = new Building(rc);     break;
+        }
+
+        while(true) {
+            try {
+                me.takeTurn();
+
+                // Clock.yield() makes the robot wait until the next turn, then it will perform this loop again
+                Clock.yield();
+            } catch (Exception e) {
+                System.out.println(rc.getType() + " Exception");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @SuppressWarnings("unused")
+    public static void oldrun(RobotController rc) throws GameActionException {
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.
