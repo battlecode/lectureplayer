@@ -4,14 +4,12 @@ import battlecode.common.*;
 public class Robot {
     RobotController rc;
     Communications comms;
-    Navigation nav;
 
     int turnCount = 0;
 
     public Robot(RobotController r) {
         this.rc = r;
         comms = new Communications(rc);
-        nav = new Navigation(rc);
     }
 
     public void takeTurn() throws GameActionException {

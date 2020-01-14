@@ -2,17 +2,22 @@ package lectureplayer;
 import battlecode.common.*;
 
 public class Unit extends Robot {
-    
+
+    Navigation nav;
+
     MapLocation hqLoc;
 
     public Unit(RobotController r) {
         super(r);
+        nav = new Navigation(rc);
     }
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
         
         System.out.println("I'm a Unit");
+
+        findHQ();
     }
 
     public void findHQ() throws GameActionException {

@@ -15,4 +15,13 @@ public class Util {
         Direction.WEST,
         Direction.NORTHWEST
     };
+
+    /**
+     * Returns a random Direction.
+     *
+     * @return a random Direction
+     */
+    static Direction randomDirection() {
+        return directions[(int) (Math.random() * directions.length)];
+    }
 }
