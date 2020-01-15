@@ -10,7 +10,6 @@ public class HQ extends Building {
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
-        System.out.println("I'm the HQ");
 
         if(turnCount == 1) {
             comms.sendHqLoc(rc.getLocation());

@@ -14,7 +14,6 @@ public class Robot {
 
     public void takeTurn() throws GameActionException {
         turnCount += 1;
-        System.out.println("I'm a robot");
     }
 
     /**

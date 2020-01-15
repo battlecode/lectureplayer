@@ -15,8 +15,6 @@ public class Unit extends Robot {
     public void takeTurn() throws GameActionException {
         super.takeTurn();
         
-        System.out.println("I'm a Unit");
-
         findHQ();
     }
 
