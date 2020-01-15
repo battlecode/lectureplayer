@@ -21,7 +21,7 @@ public strictfp class RobotPlayer {
             case MINER:              me = new Miner(rc);     break;
             case REFINERY:           me = new Refinery(rc);     break;
             case VAPORATOR:          me = new Vaporator(rc);     break;
-            case DESIGN_SCHOOL:      me = new Building(rc);     break;
+            case DESIGN_SCHOOL:      me = new DesignSchool(rc);     break;
             case FULFILLMENT_CENTER: me = new Building(rc);     break;
             case LANDSCAPER:         me = new Unit(rc);     break;
             case DELIVERY_DRONE:     me = new Unit(rc);     break;
@@ -39,15 +39,6 @@ public strictfp class RobotPlayer {
                 e.printStackTrace();
             }
         }
-    }
-
-    static void runDesignSchool() throws GameActionException {
-        if (!broadcastedCreation) {
-            broadcastDesignSchoolCreation(rc.getLocation());
-        }
-        for (Direction dir : Util.directions)
-            if(tryBuild(RobotType.LANDSCAPER, dir))
-                System.out.println("made a landscaper");
     }
 
     static void runFulfillmentCenter() throws GameActionException {
@@ -201,30 +192,5 @@ public strictfp class RobotPlayer {
             rc.buildRobot(type, dir);
             return true;
         } else return false;
-    }
-
-
-    /* COMMUNICATIONS STUFF */
-    // all messages from our team should start with this so we can tell them apart
-    static final int teamSecret = 444444444;
-    // the second entry in every message tells us what kind of message it is. e.g. 0 means it contains the HQ location
-    static final String[] messageType = {
-        "HQ loc",
-        "design school created",
-        "soup location",
-    };
-
-
-    public static boolean broadcastedCreation = false;
-    public static void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
-        int[] message = new int[7];
-        message[0] = teamSecret;
-        message[1] = 1;
-        message[2] = loc.x; // x coord of HQ
-        message[3] = loc.y; // y coord of HQ
-        if (rc.canSubmitTransaction(message, 3)) {
-            rc.submitTransaction(message, 3);
-            broadcastedCreation = true;
-        }
     }
 }

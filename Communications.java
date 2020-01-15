@@ -43,6 +43,21 @@ public class Communications {
         return null;
     }
 
+    public boolean broadcastedCreation = false;
+    public void broadcastDesignSchoolCreation(MapLocation loc) throws GameActionException {
+        if(broadcastedCreation) return; // don't re-broadcast
+
+        int[] message = new int[7];
+        message[0] = teamSecret;
+        message[1] = 1;
+        message[2] = loc.x; // x coord of HQ
+        message[3] = loc.y; // y coord of HQ
+        if (rc.canSubmitTransaction(message, 3)) {
+            rc.submitTransaction(message, 3);
+            broadcastedCreation = true;
+        }
+    }
+
     // check the latest block for unit creation messages
     public int getNewDesignSchoolCount() throws GameActionException {
         int count = 0;
