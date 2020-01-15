@@ -3,6 +3,8 @@ example player for battlecode 2020
 
 The goal of this repo is to give you a starting point and example setup for collaborating with your team.
 
+See the battlecode [YouTube channel](https://www.youtube.com/channel/UCOrfTSnyimIXfYzI8j_-CTQ) for recordings of the accompanying lectures.
+
 ## prerequisites
 
 First, make sure you have battlecode installed, following the quick setup [here](http://2020.battlecode.org/getting-started) to install the [scaffold](https://github.com/battlecode/battlecode20-scaffold).
