@@ -1,7 +1,7 @@
 package lectureplayer;
 import battlecode.common.*;
 
-public class HQ extends Building {
+public class HQ extends Shooter {
     static int numMiners = 0;
 
     public HQ(RobotController r) {
