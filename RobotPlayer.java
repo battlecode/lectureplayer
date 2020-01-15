@@ -19,8 +19,8 @@ public strictfp class RobotPlayer {
         switch (rc.getType()) {
             case HQ:                 me = new HQ(rc);     break;
             case MINER:              me = new Miner(rc);     break;
-            case REFINERY:           me = new Building(rc);     break;
-            case VAPORATOR:          me = new Building(rc);     break;
+            case REFINERY:           me = new Refinery(rc);     break;
+            case VAPORATOR:          me = new Vaporator(rc);     break;
             case DESIGN_SCHOOL:      me = new Building(rc);     break;
             case FULFILLMENT_CENTER: me = new Building(rc);     break;
             case LANDSCAPER:         me = new Unit(rc);     break;
@@ -39,14 +39,6 @@ public strictfp class RobotPlayer {
                 e.printStackTrace();
             }
         }
-    }
-
-    static void runRefinery() throws GameActionException {
-        // System.out.println("Pollution: " + rc.sensePollution(rc.getLocation()));
-    }
-
-    static void runVaporator() throws GameActionException {
-
     }
 
     static void runDesignSchool() throws GameActionException {
