@@ -23,7 +23,7 @@ public strictfp class RobotPlayer {
             case VAPORATOR:          me = new Vaporator(rc);     break;
             case DESIGN_SCHOOL:      me = new DesignSchool(rc);     break;
             case FULFILLMENT_CENTER: me = new Building(rc);     break;
-            case LANDSCAPER:         me = new Unit(rc);     break;
+            case LANDSCAPER:         me = new Landscaper(rc);     break;
             case DELIVERY_DRONE:     me = new Unit(rc);     break;
             case NET_GUN:            me = new Building(rc);     break;
         }
@@ -44,44 +44,6 @@ public strictfp class RobotPlayer {
     static void runFulfillmentCenter() throws GameActionException {
         for (Direction dir : Util.directions)
             tryBuild(RobotType.DELIVERY_DRONE, dir);
-    }
-
-    static void runLandscaper() throws GameActionException {
-        if(rc.getDirtCarrying() == 0){
-            tryDig();
-        }
-
-        MapLocation bestPlaceToBuildWall = null;
-        // find best place to build
-        if(hqLoc != null) {
-            int lowestElevation = 9999999;
-            for (Direction dir : Util.directions) {
-                MapLocation tileToCheck = hqLoc.add(dir);
-                if(rc.getLocation().distanceSquaredTo(tileToCheck) < 4
-                        && rc.canDepositDirt(rc.getLocation().directionTo(tileToCheck))) {
-                    if (rc.senseElevation(tileToCheck) < lowestElevation) {
-                        lowestElevation = rc.senseElevation(tileToCheck);
-                        bestPlaceToBuildWall = tileToCheck;
-                    }
-                }
-            }
-        }
-
-        if (Math.random() < 0.4){
-            // build the wall
-            if (bestPlaceToBuildWall != null) {
-                rc.depositDirt(rc.getLocation().directionTo(bestPlaceToBuildWall));
-                rc.setIndicatorDot(bestPlaceToBuildWall, 0, 255, 0);
-                System.out.println("building a wall");
-            }
-        }
-
-        // otherwise try to get to the hq
-        if(hqLoc != null){
-            goTo(hqLoc);
-        } else {
-            tryMove(randomDirection());
-        }
     }
 
     static void runDeliveryDrone() throws GameActionException {
@@ -120,16 +82,6 @@ public strictfp class RobotPlayer {
             if(r.getType() == target) {
                 return true;
             }
-        }
-        return false;
-    }
-
-    static boolean tryDig() throws GameActionException {
-        Direction dir = randomDirection();
-        if(rc.canDigDirt(dir)){
-            rc.digDirt(dir);
-            rc.setIndicatorDot(rc.getLocation().add(dir), 255, 0, 0);
-            return true;
         }
         return false;
     }
