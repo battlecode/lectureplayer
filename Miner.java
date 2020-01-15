@@ -13,9 +13,6 @@ public class Miner extends Unit {
 
     public void takeTurn() throws GameActionException {
         super.takeTurn();
-        System.out.println("non-fancy debug");
-        System.out.println(hqLoc);
-        System.out.println(Util.randomDirection());
 
         numDesignSchools += comms.getNewDesignSchoolCount();
         comms.updateSoupLocations(soupLocations);
