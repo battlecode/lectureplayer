@@ -7,6 +7,8 @@ public class DesignSchool extends Building {
     }
 
     public void takeTurn() throws GameActionException {
+        super.takeTurn();
+        
         // will only actually happen if we haven't already broadcasted the creation
         comms.broadcastDesignSchoolCreation(rc.getLocation());
 
