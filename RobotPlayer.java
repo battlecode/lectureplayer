@@ -1,14 +1,7 @@
 package lectureplayer;
 import battlecode.common.*;
-import java.lang.Math;
-import java.util.ArrayList;
 
 public strictfp class RobotPlayer {
-    static RobotController rc;
-
-    static int turnCount;
-    static MapLocation hqLoc;
-
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
      * If this method returns, the robot dies!
