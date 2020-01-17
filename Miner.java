@@ -19,9 +19,6 @@ public class Miner extends Unit {
         checkIfSoupGone();
 
         for (Direction dir : Util.directions)
-            if (tryRefine(dir))
-                System.out.println("I refined soup! " + rc.getTeamSoup());
-        for (Direction dir : Util.directions)
             if (tryMine(dir)) {
                 System.out.println("I mined soup! " + rc.getSoupCarrying());
                 MapLocation soupLoc = rc.getLocation().add(dir);
@@ -29,6 +26,11 @@ public class Miner extends Unit {
                     comms.broadcastSoupLocation(soupLoc);
                 }
             }
+        // mine first, then when full, deposit
+        for (Direction dir : Util.directions)
+            if (tryRefine(dir))
+                System.out.println("I refined soup! " + rc.getTeamSoup());
+
         if (numDesignSchools < 3){
             if(tryBuild(RobotType.DESIGN_SCHOOL, Util.randomDirection()))
                 System.out.println("created a design school");
