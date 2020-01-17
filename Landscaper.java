@@ -10,6 +10,13 @@ public class Landscaper extends Unit {
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
+        // first, save HQ
+        if (hqLoc != null && hqLoc.isAdjacentTo(rc.getLocation())) {
+            Direction dirtohq = rc.getLocation().directionTo(hqLoc);
+            if(rc.canDigDirt(dirtohq)){
+                rc.digDirt(dirtohq);
+        }
+
         if(rc.getDirtCarrying() == 0){
             tryDig();
         }
