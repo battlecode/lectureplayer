@@ -13,7 +13,7 @@ public class HQ extends Shooter {
     public void takeTurn() throws GameActionException {
         super.takeTurn();
 
-        if(numMiners < 50) {
+        if(numMiners < 10) {
             for (Direction dir : Util.directions)
                 if(tryBuild(RobotType.MINER, dir)){
                     numMiners++;
