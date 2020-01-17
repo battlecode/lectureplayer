@@ -15,6 +15,7 @@ public class Landscaper extends Unit {
             Direction dirtohq = rc.getLocation().directionTo(hqLoc);
             if(rc.canDigDirt(dirtohq)){
                 rc.digDirt(dirtohq);
+            }
         }
 
         if(rc.getDirtCarrying() == 0){
